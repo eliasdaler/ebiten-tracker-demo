@@ -40,12 +40,6 @@ type Game struct {
 var start bool = true
 
 func (g *Game) Update() error {
-	if start {
-		for i := 0; i < 40*10; i++ {
-			g.GenerateSamples()
-		}
-		start = false
-	}
 
 	for i := 0; i < 5; i++ {
 		if g.rb.Size() > sampleRate*2 {
@@ -118,6 +112,13 @@ func main() {
 	g.audioContext = audio.NewContext(sampleRate)
 	g.musicPlayer, err = g.audioContext.NewPlayer(g.rb)
 	g.musicPlayer.SetBufferSize(time.Second / 20)
+
+	if start {
+		for i := 0; i < 40*10; i++ {
+			g.GenerateSamples()
+		}
+		start = false
+	}
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

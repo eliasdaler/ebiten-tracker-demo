@@ -2,7 +2,7 @@ module github.com/eliasdaler/ebiten-tracker-demo
 
 go 1.19
 
-replace github.com/gotracker/goaudiofile => ../repos/goaudiofile
+replace github.com/gotracker/goaudiofile => ./goaudiofile
 
 require (
 	github.com/gotracker/gomixing v1.3.0

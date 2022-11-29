@@ -6,14 +6,11 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/gotracker/gomixing/mixing"
 	"github.com/gotracker/gomixing/sampling"
@@ -24,9 +21,6 @@ import (
 
 //go:embed theme.xm
 var fileBytes []byte
-
-//go:embed test.wav
-var wavFile []byte
 
 const (
 	screenWidth  = 640
@@ -46,9 +40,9 @@ type Game struct {
 	panMixer    mixing.PanMixer
 
 	rb *RingBuffer
-}
 
-var rawWavData []byte
+	time int
+}
 
 type RingBuffer struct {
 	head     int
@@ -119,14 +113,15 @@ func (rb *RingBuffer) Read(b []byte) (n int, err error) {
 		if rb.Empty() {
 			panic("WHAT")
 		}
-		rawWavData = append(rawWavData, b[i])
 	}
 
 	return len(b), nil
 }
 
 func (g *Game) Update() error {
-	if !g.musicPlayer.IsPlaying() {
+	g.time++
+
+	if !g.musicPlayer.IsPlaying() && g.time > 100 {
 		g.musicPlayer.Play()
 	}
 
@@ -135,10 +130,6 @@ func (g *Game) Update() error {
 			break
 		}
 		g.GenerateSamples()
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		os.WriteFile("test.raw", rawWavData, 0644)
 	}
 
 	return nil
@@ -153,7 +144,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) GenerateSamples() {
-	return
 	premix, err := g.trackPlayer.Generate(0)
 	if err != nil {
 		// log.Fatal(err)
@@ -204,11 +194,8 @@ func main() {
 	}
 
 	g.audioContext = audio.NewContext(sampleRate)
-	// g.musicPlayer, err = g.audioContext.NewPlayer(g.rb)
-
-	w, _ := wav.Decode(g.audioContext, bytes.NewReader(wavFile))
-	g.musicPlayer, _ = g.audioContext.NewPlayer(w)
-	g.musicPlayer.SetBufferSize(time.Second / 10)
+	g.musicPlayer, err = g.audioContext.NewPlayer(g.rb)
+	g.musicPlayer.SetBufferSize(time.Second / 20)
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}

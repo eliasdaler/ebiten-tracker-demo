@@ -11,7 +11,6 @@ require (
 )
 
 require (
-	github.com/cryptix/wav v0.0.0-20180415113528-8bdace674401 // indirect
 	github.com/ebitengine/purego v0.0.0-20220905075623-aeed57cda744 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220806181222-55e207c401ad // indirect
 	github.com/gotracker/goaudiofile v1.0.14 // indirect

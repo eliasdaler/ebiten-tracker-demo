@@ -394,9 +394,9 @@ func readInstrumentHeader(r io.Reader) (*InstrumentHeader, error) {
 
 		// convert the sample in the background
 		if (s.Flags & SampleFlag16Bit) != 0 {
-			go convertSample16Bit(s.SampleData)
+			convertSample16Bit(s.SampleData)
 		} else {
-			go convertSample8Bit(s.SampleData)
+			convertSample8Bit(s.SampleData)
 		}
 	}
 	return ih, nil

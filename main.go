@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"fmt"
-	"io"
 	"log"
 	"time"
 
@@ -28,9 +26,6 @@ const (
 	sampleRate   = 44100
 )
 
-var sampleLength int64
-var trueSample io.ReadSeeker
-
 type Game struct {
 	audioContext *audio.Context
 	musicPlayer  *audio.Player
@@ -40,89 +35,16 @@ type Game struct {
 	panMixer    mixing.PanMixer
 
 	rb *RingBuffer
-
-	time int
 }
 
-type RingBuffer struct {
-	head     int
-	tail     int
-	capacity int
-
-	buf []byte
-}
-
-func NewRingBuffer(capacity int) *RingBuffer {
-	if capacity <= 0 {
-		panic("invalid buffer capacity")
-	}
-	return &RingBuffer{
-		head:     0,
-		tail:     0,
-		capacity: capacity + 1,
-		buf:      make([]byte, capacity+1),
-	}
-}
-
-func (rb *RingBuffer) Append(b byte) {
-	if (rb.tail+1)%rb.capacity == rb.head {
-		panic("buffer overflow")
-	}
-
-	rb.buf[rb.tail] = b
-	rb.tail = (rb.tail + 1) % rb.capacity
-}
-
-func (rb *RingBuffer) Empty() bool {
-	return rb.Size() == 0
-}
-
-func (rb *RingBuffer) Size() int {
-	if rb.tail == rb.head {
-		return 0
-	}
-
-	if rb.tail > rb.head {
-		return rb.tail - rb.head
-	}
-	return rb.capacity - rb.head + rb.tail
-}
-
-func (rb *RingBuffer) Pop() byte {
-	if rb.Empty() {
-		return 0
-	}
-
-	b := rb.buf[rb.head]
-	rb.head = (rb.head + 1) % rb.capacity
-	return b
-}
-
-func (rb *RingBuffer) Read(b []byte) (n int, err error) {
-	fmt.Println("want", len(b), " got", rb.Size())
-
-	if rb.Empty() {
-		for i := 0; i < len(b); i++ {
-			b[i] = 0
-		}
-		return len(b), nil
-	}
-
-	for i := 0; i < len(b); i++ {
-		b[i] = rb.Pop()
-		if rb.Empty() {
-			panic("WHAT")
-		}
-	}
-
-	return len(b), nil
-}
+var start bool = true
 
 func (g *Game) Update() error {
-	g.time++
-
-	if !g.musicPlayer.IsPlaying() && g.time > 100 {
-		g.musicPlayer.Play()
+	if start {
+		for i := 0; i < 40*10; i++ {
+			g.GenerateSamples()
+		}
+		start = false
 	}
 
 	for i := 0; i < 5; i++ {
@@ -130,6 +52,10 @@ func (g *Game) Update() error {
 			break
 		}
 		g.GenerateSamples()
+	}
+
+	if !g.musicPlayer.IsPlaying() {
+		g.musicPlayer.Play()
 	}
 
 	return nil
@@ -162,7 +88,7 @@ func main() {
 	// ebiten.SetRunnableOnUnfocused(false)
 
 	g := &Game{}
-	g.rb = NewRingBuffer(sampleRate * 4)
+	g.rb = NewRingBuffer(sampleRate * 40)
 
 	var features []feature.Feature
 	features = append(features, feature.UseNativeSampleFormat(true))
@@ -189,13 +115,10 @@ func main() {
 	}
 	g.panMixer = mixing.GetPanMixer(channels)
 
-	for i := 0; i < 40; i++ {
-		g.GenerateSamples()
-	}
-
 	g.audioContext = audio.NewContext(sampleRate)
 	g.musicPlayer, err = g.audioContext.NewPlayer(g.rb)
 	g.musicPlayer.SetBufferSize(time.Second / 20)
+
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}

@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/gotracker/gomixing/mixing"
 	"github.com/gotracker/gomixing/sampling"
@@ -40,7 +42,6 @@ type Game struct {
 var start bool = true
 
 func (g *Game) Update() error {
-
 	for i := 0; i < 5; i++ {
 		if g.rb.Size() > sampleRate*2 {
 			break
@@ -52,11 +53,15 @@ func (g *Game) Update() error {
 		g.musicPlayer.Play()
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyL) {
+		lag = true
+	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "Now playing... Cave Story - Toroko Theme")
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("Now playing... Cave Story - Toroko Theme, %s", g.musicPlayer.Current()))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

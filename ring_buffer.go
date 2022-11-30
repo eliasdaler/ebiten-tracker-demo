@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"time"
+)
+
 type RingBuffer struct {
 	head     int
 	tail     int
@@ -54,7 +59,16 @@ func (rb *RingBuffer) Pop() byte {
 	return b
 }
 
+var lag bool
+
 func (rb *RingBuffer) Read(b []byte) (n int, err error) {
+	fmt.Println("READ", len(b))
+	if lag {
+		time.Sleep(5000 * time.Millisecond)
+		fmt.Println("LAG", len(b))
+		lag = false
+		return 0, nil
+	}
 	if rb.Empty() {
 		for i := 0; i < len(b); i++ {
 			b[i] = 0

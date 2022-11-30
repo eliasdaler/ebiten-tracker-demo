@@ -1,6 +1,6 @@
 module github.com/eliasdaler/ebiten-tracker-demo
 
-go 1.19
+go 1.18
 
 replace github.com/gotracker/goaudiofile => ./goaudiofile
 

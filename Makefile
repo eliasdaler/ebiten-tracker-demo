@@ -42,7 +42,7 @@ prod/web:
 	@echo "Making prod wasm build..."
 	rm -rf prod/web
 	mkdir -p prod/web
-	GOOS=js GOARCH=wasm go build -tags "prod,js" -o prod/web/game.wasm .
+	GOOS=js GOARCH=wasm go build -tags "prod,js" -ldflags="-s -w" -trimpath -o prod/web/game.wasm .
 	cp -r html/* prod/web
 	cp $(WASM_EXEC_PATH) prod/web
 

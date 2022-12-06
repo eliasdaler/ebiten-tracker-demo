@@ -17,7 +17,7 @@ import (
 	"github.com/gotracker/playback/player/feature"
 )
 
-//go:embed theme.xm
+//go:embed belthsar.s3m
 var fileBytes []byte
 
 const (
@@ -56,7 +56,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "Now playing... Cave Story - Toroko Theme")
+	ebitenutil.DebugPrint(screen, "Now playing... belthsar.s3m (Sandro R.)")
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -89,7 +89,7 @@ func main() {
 	features = append(features, feature.IgnoreUnknownEffect{Enabled: true})
 	features = append(features, feature.SongLoop{Count: 0})
 
-	player, _, err := format.LoadFromReader("xm", bytes.NewReader(fileBytes), features)
+	player, _, err := format.LoadFromReader("s3m", bytes.NewReader(fileBytes), features)
 	if err != nil {
 		panic(err)
 	}
